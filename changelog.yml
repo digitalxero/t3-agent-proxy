@@ -1,1 +1,21 @@
-[]
+- semver: 0.1.0
+  date: 2026-10-22T02:59:55.58435989-07:00
+  packager: DigitalXero
+  changes:
+    - commit: 3b66b6cc6b14cb87713a7d13c68d5abacc82725f
+      note: 'feat: implement standalone T3 agent proxy plugin'
+      author:
+        name: Dj Gilcrease
+        email: digitalxero@gmail.com
+      committer:
+        name: Dj Gilcrease
+        email: digitalxero@gmail.com
+      conventional_commit:
+        category: feat
+        scope: ""
+        description: implement standalone T3 agent proxy plugin
+        body: ""
+        footer: []
+        major: false
+        minor: true
+        patch: false

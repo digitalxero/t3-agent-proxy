@@ -32,7 +32,7 @@ Account import accepts a JSON credential object; `tokens` objects from Codex cre
 
 Other credential providers are `claude`, `gemini`, `antigravity`, `kimi`, and `xai`. OAuth account imports can contain `access_token`, `refresh_token`, `id_token`, `email`, `account_id`, `project_id`, `expired`, or `expiry_date` as appropriate for their provider. Duplicate account names are rejected. Names must end in `.json`.
 
-OAuth uses the provider's browser or device flow. When a browser callback cannot reach the environment, paste its final redirect URL into the private completion field. Google OAuth flows require operator-provided `T3CODE_PROXY_GEMINI_CLIENT_ID` / `T3CODE_PROXY_GEMINI_CLIENT_SECRET` or `T3CODE_PROXY_ANTIGRAVITY_CLIENT_ID` / `T3CODE_PROXY_ANTIGRAVITY_CLIENT_SECRET` environment variables. Provider policies, client registration, subscriptions, and endpoint availability still apply.
+OAuth uses the provider's browser or device flow. When a browser callback cannot reach the environment, paste its final redirect URL into the private completion field. Google OAuth flows require operator-provided `T3CODE_PROXY_GEMINI_OAUTH_CLIENT_ID` / `T3CODE_PROXY_GEMINI_OAUTH_CLIENT_SECRET` or `T3CODE_PROXY_ANTIGRAVITY_OAUTH_CLIENT_ID` / `T3CODE_PROXY_ANTIGRAVITY_OAUTH_CLIENT_SECRET` environment variables. Provider policies, client registration, subscriptions, and endpoint availability still apply.
 
 The HTTP API is under `/api/plugins/agent-proxy`. It accepts OpenAI Responses, Chat Completions, Anthropic Messages, and Google generation routes, including streaming and tool-call translation. Fetch `/v1/models` for the available models. Authenticate with the proxy key as a Bearer token, `x-api-key`, or the Google `key` query parameter.
 
