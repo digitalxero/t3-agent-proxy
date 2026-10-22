@@ -28,7 +28,41 @@ import {
 import * as ProxyRuntime from "./runtime.ts";
 import * as ProxyStorage from "./storage.ts";
 
-const VERSION = "0.1.0";
+import { version } from "./version.ts";
+const MAX_REQUEST_BYTES = 16 * 1024 * 1024;
+class RequestBodyTooLarge extends Error {}
+
+const readPayload = (request: Request) =>
+  Effect.tryPromise({
+    try: async () => {
+      const reader = request.body?.getReader();
+      if (!reader) return JSON.parse("") as unknown;
+      try {
+        const chunks: Uint8Array[] = [];
+        let size = 0;
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          size += value.byteLength;
+          if (size > MAX_REQUEST_BYTES) {
+            await reader.cancel().catch(() => {});
+            throw new RequestBodyTooLarge();
+          }
+          chunks.push(value);
+        }
+        return JSON.parse(
+          new TextDecoder("utf-8", { fatal: true }).decode(Buffer.concat(chunks, size)),
+        ) as unknown;
+      } finally {
+        reader.releaseLock();
+      }
+    },
+    catch: (cause) =>
+      new PluginError({
+        operation: cause instanceof RequestBodyTooLarge ? "body-too-large" : "json",
+        cause: null,
+      }),
+  });
 const decodeManage = Schema.decodeUnknownEffect(ModelProxyManageInput);
 const decodeCredential = Schema.decodeUnknownEffect(
   Schema.fromJsonString(Schema.Record(Schema.String, Schema.Unknown)),
@@ -63,7 +97,7 @@ export default {
   apiVersion: 1,
   id: "agent-proxy",
   name: "Agent proxy",
-  version: VERSION,
+  version,
   description: "An external OAuth account pool with quota-aware model routing.",
   activate: (host) =>
     Effect.gen(function* () {
@@ -692,11 +726,7 @@ export default {
               url.searchParams.get("key") ??
               "";
             let payload: unknown = {};
-            if (!["GET", "HEAD"].includes(request.method))
-              payload = yield* Effect.tryPromise({
-                try: () => request.json(),
-                catch: () => new PluginError({ operation: "json", cause: null }),
-              });
+            if (!["GET", "HEAD"].includes(request.method)) payload = yield* readPayload(request);
             const response = yield* proxy
               .forward({
                 path: url.pathname.slice(host.httpBasePath.length) + url.search,
@@ -715,13 +745,15 @@ export default {
                     { error: { message: error.message, type: error.operation } },
                     {
                       status:
-                        error.operation === "unauthorized"
-                          ? 401
-                          : error.operation === "noAccounts" || error.operation === "disabled"
-                            ? 503
-                            : error.operation === "unsupported" || error.operation === "json"
-                              ? 400
-                              : 502,
+                        error.operation === "body-too-large"
+                          ? 413
+                          : error.operation === "unauthorized"
+                            ? 401
+                            : error.operation === "noAccounts" || error.operation === "disabled"
+                              ? 503
+                              : error.operation === "unsupported" || error.operation === "json"
+                                ? 400
+                                : 502,
                     },
                   ),
                 ),
