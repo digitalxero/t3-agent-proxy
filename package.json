@@ -1,6 +1,6 @@
 {
   "name": "@digitalxero/t3-agent-proxy",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "vp pack",
+    "verify": "node scripts/verify-release.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vp test run",
     "lint": "vp lint src",

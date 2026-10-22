@@ -38,7 +38,7 @@ it.effect("activates using only the SDK and returns valid portable settings and 
         expect(decodeView(yield* view.read()).title).toBe("Agent proxy");
       }
       const status = yield* command(contributions, "status")({});
-      expect(status).toMatchObject({ enabled: false, version: "0.1.1", accounts: [] });
+      expect(status).toMatchObject({ enabled: false, version: plugin.version, accounts: [] });
       expect(
         contributions.commands
           ?.filter((command) =>
