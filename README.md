@@ -34,7 +34,7 @@ Other credential providers are `claude`, `gemini`, `antigravity`, `kimi`, and `x
 
 OAuth uses the provider's browser or device flow. When a browser callback cannot reach the environment, paste its final redirect URL into the private completion field. Google OAuth flows require operator-provided `T3CODE_PROXY_GEMINI_OAUTH_CLIENT_ID` / `T3CODE_PROXY_GEMINI_OAUTH_CLIENT_SECRET` or `T3CODE_PROXY_ANTIGRAVITY_OAUTH_CLIENT_ID` / `T3CODE_PROXY_ANTIGRAVITY_OAUTH_CLIENT_SECRET` environment variables. Provider policies, client registration, subscriptions, and endpoint availability still apply.
 
-The HTTP API is under `/api/plugins/agent-proxy`. It accepts OpenAI Responses, Chat Completions, Anthropic Messages, and Google generation routes, including streaming and tool-call translation. Fetch `/v1/models` for the available models. Authenticate with the proxy key as a Bearer token, `x-api-key`, or the Google `key` query parameter.
+The HTTP API is under `/api/plugins/agent-proxy`. It accepts OpenAI Responses, Chat Completions, Anthropic Messages, and Google generation routes, including streaming and tool-call translation. JSON request bodies are limited to 16 MiB; oversized uploads are cancelled and return HTTP 413. Fetch `/v1/models` for the available models. Authenticate with the proxy key as a Bearer token, `x-api-key`, or the Google `key` query parameter.
 
 **Reveal key** or **Rotate key** opens a masked, temporary private result with a copy action. Keys never appear in the ordinary settings/usage view or agent-readable command results. Rotating invalidates the previous key.
 

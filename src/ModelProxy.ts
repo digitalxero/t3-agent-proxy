@@ -1,3 +1,4 @@
+import { version } from "./version.ts";
 import {
   MODEL_PROXY_PATH,
   ModelProxyError,
@@ -577,7 +578,7 @@ export const make = Effect.gen(function* () {
     return {
       enabled: state.enabled,
       status: storageFailed ? "failed" : state.enabled ? "running" : "stopped",
-      version: "0.1.0",
+      version,
       endpointPath: `${MODEL_PROXY_PATH}/v1`,
       strategy: state.strategy === "fill-first" ? "closest-reset" : state.strategy,
       stickyIdleMinutes: state.stickyIdleMinutes ?? 12,

@@ -24918,6 +24918,9 @@ const makeResponse = (options, ownedHeaders) => {
 	return self;
 };
 //#endregion
+//#region src/version.ts
+const version = "0.1.1";
+//#endregion
 //#region src/domain.ts
 const TrimmedNonEmptyString = String$2.check(makeFilter((value) => value.trim().length > 0));
 const IsoDateTime = String$2;
@@ -27491,7 +27494,7 @@ const layer = effect(ModelProxy, gen(function* () {
 		return {
 			enabled: state.enabled,
 			status: storageFailed ? "failed" : state.enabled ? "running" : "stopped",
-			version: "0.1.0",
+			version,
 			endpointPath: `${MODEL_PROXY_PATH}/v1`,
 			strategy: state.strategy === "fill-first" ? "closest-reset" : state.strategy,
 			stickyIdleMinutes: state.stickyIdleMinutes ?? 12,
@@ -28118,7 +28121,35 @@ fn("proxyProviderEnvironment")(function* (driver, base) {
 });
 //#endregion
 //#region src/plugin.ts
-const VERSION = "0.1.0";
+const MAX_REQUEST_BYTES = 16777216;
+var RequestBodyTooLarge = class extends Error {};
+const readPayload = (request) => tryPromise({
+	try: async () => {
+		const reader = request.body?.getReader();
+		if (!reader) return JSON.parse("");
+		try {
+			const chunks = [];
+			let size = 0;
+			for (;;) {
+				const { done, value } = await reader.read();
+				if (done) break;
+				size += value.byteLength;
+				if (size > MAX_REQUEST_BYTES) {
+					await reader.cancel().catch(() => {});
+					throw new RequestBodyTooLarge();
+				}
+				chunks.push(value);
+			}
+			return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(Buffer.concat(chunks, size)));
+		} finally {
+			reader.releaseLock();
+		}
+	},
+	catch: (cause) => new PluginError({
+		operation: cause instanceof RequestBodyTooLarge ? "body-too-large" : "json",
+		cause: null
+	})
+});
 const decodeManage = decodeUnknownEffect(ModelProxyManageInput);
 const decodeCredential = decodeUnknownEffect(fromJsonString(Record(String$2, Unknown)));
 const decodeConfigArgs = decodeUnknownEffect(fromJsonString(Struct({ args: ArraySchema(String$2) })));
@@ -28152,7 +28183,7 @@ var plugin_default = {
 	apiVersion: 1,
 	id: "agent-proxy",
 	name: "Agent proxy",
-	version: VERSION,
+	version,
 	description: "An external OAuth account pool with quota-aware model routing.",
 	activate: (host) => gen(function* () {
 		const context = yield* build(layer.pipe(provide(layer$1(host)), provide(succeed$4(ProxyRuntime, { baseUrl: host.httpBaseUrl.pipe(mapError$2(() => new ModelProxyError({ operation: "disabled" }))) })), provide(layer$2), provide(layer$3)));
@@ -28559,13 +28590,7 @@ var plugin_default = {
 				const url = new URL(request.url);
 				const apiKey = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? request.headers.get("x-api-key") ?? url.searchParams.get("key") ?? "";
 				let payload = {};
-				if (!["GET", "HEAD"].includes(request.method)) payload = yield* tryPromise({
-					try: () => request.json(),
-					catch: () => new PluginError({
-						operation: "json",
-						cause: null
-					})
-				});
+				if (!["GET", "HEAD"].includes(request.method)) payload = yield* readPayload(request);
 				const response = yield* proxy.forward({
 					path: url.pathname.slice(host.httpBasePath.length) + url.search,
 					method: request.method,
@@ -28577,7 +28602,7 @@ var plugin_default = {
 			}).pipe(catchTags({ PluginError: (error) => succeed$3(Response.json({ error: {
 				message: error.message,
 				type: error.operation
-			} }, { status: error.operation === "unauthorized" ? 401 : error.operation === "noAccounts" || error.operation === "disabled" ? 503 : error.operation === "unsupported" || error.operation === "json" ? 400 : 502 })) }))
+			} }, { status: error.operation === "body-too-large" ? 413 : error.operation === "unauthorized" ? 401 : error.operation === "noAccounts" || error.operation === "disabled" ? 503 : error.operation === "unsupported" || error.operation === "json" ? 400 : 502 })) }))
 		};
 	})
 };

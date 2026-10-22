@@ -38,7 +38,7 @@ it.effect("activates using only the SDK and returns valid portable settings and 
         expect(decodeView(yield* view.read()).title).toBe("Agent proxy");
       }
       const status = yield* command(contributions, "status")({});
-      expect(status).toMatchObject({ enabled: false, version: "0.1.0", accounts: [] });
+      expect(status).toMatchObject({ enabled: false, version: "0.1.1", accounts: [] });
       expect(
         contributions.commands
           ?.filter((command) =>
@@ -137,4 +137,62 @@ it.effect("authenticates HTTP separately and rotates an explicitly disclosed key
       expect(forged._tag).toBe("Failure");
     }),
   ),
+);
+
+it.effect("rejects oversized streamed JSON bodies and cancels the unread upload", () =>
+  Effect.scoped(
+    Effect.gen(function* () {
+      const contributions = yield* plugin.activate(host());
+      let cancelled = false;
+      let chunks = 0;
+      const body = new ReadableStream<Uint8Array>({
+        pull(controller) {
+          chunks++;
+          controller.enqueue(new Uint8Array(65536));
+        },
+        cancel() {
+          cancelled = true;
+        },
+      });
+      const response = yield* contributions.handleHttp!(
+        new Request("http://localhost/api/plugins/agent-proxy/v1/responses", {
+          method: "POST",
+          ...{ body, duplex: "half" },
+        }),
+      );
+      expect(response.status).toBe(413);
+      expect(cancelled).toBe(true);
+      expect(chunks).toBeLessThanOrEqual(258);
+      expect(yield* Effect.promise(() => response.json())).toMatchObject({
+        error: { type: "body-too-large" },
+      });
+      expect((yield* contributions.views![0]!.read()).title).toBe("Agent proxy");
+    }),
+  ),
+);
+
+it.effect(
+  "returns a JSON error for malformed request bodies without breaking subsequent requests",
+  () =>
+    Effect.scoped(
+      Effect.gen(function* () {
+        const contributions = yield* plugin.activate(host());
+        yield* command(contributions, "start")({});
+        const response = yield* contributions.handleHttp!(
+          new Request("http://localhost/api/plugins/agent-proxy/v1/responses", {
+            method: "POST",
+            body: "{invalid-json",
+          }),
+        );
+        expect(response.status).toBe(400);
+        expect(yield* Effect.promise(() => response.json())).toMatchObject({
+          error: { type: "json" },
+        });
+        expect(
+          (yield* contributions.handleHttp!(
+            new Request("http://localhost/api/plugins/agent-proxy/v1/models"),
+          )).status,
+        ).toBe(401);
+      }),
+    ),
 );
