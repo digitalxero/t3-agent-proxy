@@ -1,0 +1,11 @@
+{
+  "name": "@t3tools/plugin-sdk",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "dependencies": {
+    "effect": "4.0.1"
+  }
+}

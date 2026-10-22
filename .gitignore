@@ -1,0 +1,6 @@
+node_modules/
+coverage/
+.vite-plus/
+*.tsbuildinfo
+.env
+.evidence/
