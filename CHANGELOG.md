@@ -1,4 +1,10 @@
 
+0.1.2
+=============
+2026-10-22
+
+* fix(release): keep plugin manifests and built bundle versions consistent (d413a61d)
+
 0.1.1
 =============
 2026-10-22

@@ -1,3 +1,24 @@
+- semver: 0.1.2
+  date: 2026-10-22T04:04:16.170706576-07:00
+  packager: DigitalXero
+  changes:
+    - commit: d413a61da00def88b781bad466304a06e53d74ef
+      note: 'fix(release): keep plugin manifests and built bundle versions consistent'
+      author:
+        name: Dj Gilcrease
+        email: digitalxero@gmail.com
+      committer:
+        name: Dj Gilcrease
+        email: digitalxero@gmail.com
+      conventional_commit:
+        category: fix
+        scope: release
+        description: keep plugin manifests and built bundle versions consistent
+        body: ""
+        footer: []
+        major: false
+        minor: false
+        patch: true
 - semver: 0.1.1
   date: 2026-10-22T03:57:51.585749756-07:00
   packager: DigitalXero

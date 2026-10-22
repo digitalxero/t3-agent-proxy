@@ -25,5 +25,6 @@ jobs:
       - run: npm test
       - run: npm run lint
       - run: npm run build
+      - run: npm run verify
       - name: Release package is reproducible
         run: git diff --exit-code -- dist
