@@ -13,6 +13,7 @@ const command = (contributions: PluginContributions, id: string) => {
 };
 const host = (saved = new Map<string, string>()): PluginContext => ({
   id: "agent-proxy",
+  capabilities: ["settings-pages"],
   dataDirectory: "/unused",
   httpBasePath: "/api/plugins/agent-proxy",
   httpBaseUrl: Effect.succeed("http://127.0.0.1:43123/api/plugins/agent-proxy"),
@@ -34,6 +35,10 @@ it.effect("activates using only the SDK and returns valid portable settings and 
     Effect.gen(function* () {
       const contributions = yield* plugin.activate(host());
       expect(plugin.apiVersion).toBe(1);
+      expect(contributions.views?.map((view) => view.location)).toEqual(["settings-page", "usage"]);
+      expect(
+        (yield* plugin.activate({ ...host(), capabilities: [] }).pipe(Effect.result))._tag,
+      ).toBe("Failure");
       for (const view of contributions.views ?? []) {
         expect(decodeView(yield* view.read()).title).toBe("Agent proxy");
       }

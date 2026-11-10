@@ -101,6 +101,8 @@ export default {
   description: "An external OAuth account pool with quota-aware model routing.",
   activate: (host) =>
     Effect.gen(function* () {
+      if (!host.capabilities?.includes("settings-pages"))
+        return yield* new PluginError({ operation: "settings-pages-required", cause: null });
       const context = yield* Layer.build(
         proxyLayer.pipe(
           Layer.provide(ProxyStorage.layer(host)),
@@ -678,7 +680,7 @@ export default {
           {
             id: "settings",
             title: "Agent proxy",
-            location: "settings",
+            location: "settings-page",
             permission: "providers:manage",
             read: () => view("settings"),
           },

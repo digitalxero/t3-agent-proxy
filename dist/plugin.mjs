@@ -19100,7 +19100,11 @@ Struct({
 Struct({
 	id: PluginLocalId,
 	title: Label,
-	location: Literals(["settings", "usage"]),
+	location: Literals([
+		"settings",
+		"settings-page",
+		"usage"
+	]),
 	permission: PluginPermission
 });
 Struct({
@@ -19124,6 +19128,63 @@ var PluginError = class extends TaggedError()("PluginError", {
 		return `Plugin operation failed (${this.operation}).`;
 	}
 };
+Record(PluginLocalId, Union([Struct({
+	transport: Literal("stdio"),
+	command: Text,
+	args: ArraySchema(Text).check(isMaxLength(100)),
+	environment: Record(Label, Text)
+}), Struct({
+	transport: Literals(["http", "sse"]),
+	url: Text,
+	headers: Record(Label, Text)
+})])).check(makeFilter((servers) => Object.keys(servers).length <= 100));
+Struct({
+	provider: Label,
+	instanceId: Label,
+	projectDirectory: optionalKey(Text),
+	cwd: optionalKey(Text)
+});
+Struct({
+	command: Text,
+	args: ArraySchema(Text).check(isMaxLength(100)),
+	cwd: Text,
+	environment: Record(Label, Text),
+	timeoutMs: Int.check(isBetween({
+		minimum: 1e3,
+		maximum: 15e5
+	}))
+});
+Struct({
+	code: NullOr(Int),
+	timedOut: Boolean$1,
+	stdout: Text,
+	stderr: Text,
+	stdoutTruncated: Boolean$1,
+	stderrTruncated: Boolean$1
+});
+Int.check(isBetween({
+	minimum: 1e3,
+	maximum: 39e5
+}));
+Struct({
+	type: Literals([
+		"worktree.created",
+		"worktree.removing",
+		"worktree.removed"
+	]),
+	repositoryDirectory: Text,
+	worktreePath: Text,
+	refName: optionalKey(Text)
+});
+NullOr(Struct({ error: Text }));
+TaggedError()("PluginLifecycleBlocked", {
+	pluginId: PluginId,
+	message: Text
+});
+Int.check(isBetween({
+	minimum: 1e3,
+	maximum: 18e5
+}));
 //#endregion
 //#region node_modules/effect/dist/internal/ulid.js
 const maxTimestamp = 2 ** 48 - 1;
@@ -28186,6 +28247,10 @@ var plugin_default = {
 	version,
 	description: "An external OAuth account pool with quota-aware model routing.",
 	activate: (host) => gen(function* () {
+		if (!host.capabilities?.includes("settings-pages")) return yield* new PluginError({
+			operation: "settings-pages-required",
+			cause: null
+		});
 		const context = yield* build(layer.pipe(provide(layer$1(host)), provide(succeed$4(ProxyRuntime, { baseUrl: host.httpBaseUrl.pipe(mapError$2(() => new ModelProxyError({ operation: "disabled" }))) })), provide(layer$2), provide(layer$3)));
 		const proxy = get(context, ModelProxy);
 		const revision = yield* make$6(0);
@@ -28556,7 +28621,7 @@ var plugin_default = {
 			views: [{
 				id: "settings",
 				title: "Agent proxy",
-				location: "settings",
+				location: "settings-page",
 				permission: "providers:manage",
 				read: () => view("settings")
 			}, {
