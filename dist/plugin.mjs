@@ -24980,7 +24980,7 @@ const makeResponse = (options, ownedHeaders) => {
 };
 //#endregion
 //#region src/version.ts
-const version = "0.1.2";
+const version = "0.2.0";
 //#endregion
 //#region src/domain.ts
 const TrimmedNonEmptyString = String$2.check(makeFilter((value) => value.trim().length > 0));
