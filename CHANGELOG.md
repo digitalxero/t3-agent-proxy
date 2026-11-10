@@ -1,4 +1,10 @@
 
+0.2.0
+=============
+2026-11-10
+
+* feat: move agent proxy configuration into its own settings page (17eb4ee3)
+
 0.1.2
 =============
 2026-10-22

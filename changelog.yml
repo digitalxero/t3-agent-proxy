@@ -1,3 +1,24 @@
+- semver: 0.2.0
+  date: 2026-11-09T20:20:45.252155095-08:00
+  packager: DigitalXero
+  changes:
+    - commit: 17eb4ee38ce4e94cc66c4021952dee47804b76b9
+      note: 'feat: move agent proxy configuration into its own settings page'
+      author:
+        name: Dj Gilcrease
+        email: digitalxero@gmail.com
+      committer:
+        name: Dj Gilcrease
+        email: digitalxero@gmail.com
+      conventional_commit:
+        category: feat
+        scope: ""
+        description: move agent proxy configuration into its own settings page
+        body: ""
+        footer: []
+        major: false
+        minor: true
+        patch: false
 - semver: 0.1.2
   date: 2026-10-22T04:04:16.170706576-07:00
   packager: DigitalXero

@@ -14,7 +14,7 @@ https://github.com/digitalxero/t3-agent-proxy
 
 The host installs the newest stable `vX.Y.Z` Git tag. Tags contain the ready-to-run `dist/plugin.mjs`; installation does not run npm or repository scripts. Updates are checked daily while the environment is running, or with **Check for updates**. Choose **Update** to install one. **Remove** stops the plugin and deletes its managed state and credentials.
 
-The plugin runs on the selected environment. Its settings and usage panels render through the host's portable controls on web, desktop, and mobile. It does not execute plugin UI JavaScript in a client.
+Open **Settings → Extensions → Agent proxy** to configure it. The plugin requires the PoC host with standalone settings pages. It runs on the selected environment. Its settings and usage panels render through the host's portable controls on web, desktop, and mobile. It does not execute plugin UI JavaScript in a client.
 
 ## Use the proxy
 
@@ -27,7 +27,7 @@ Supported strategies are **closest reset**, **round robin**, and **least active 
 Account import accepts a JSON credential object; `tokens` objects from Codex credentials are also recognized. For example, with a fresh test or real key entered privately in the password field:
 
 ```json
-{"provider":"codex","api_key":"YOUR_OPENAI_API_KEY"}
+{ "provider": "codex", "api_key": "YOUR_OPENAI_API_KEY" }
 ```
 
 Other credential providers are `claude`, `gemini`, `antigravity`, `kimi`, and `xai`. OAuth account imports can contain `access_token`, `refresh_token`, `id_token`, `email`, `account_id`, `project_id`, `expired`, or `expiry_date` as appropriate for their provider. Duplicate account names are rejected. Names must end in `.json`.

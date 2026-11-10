@@ -4,3 +4,5 @@ b171a82e80cf7a50bcbfe5cd2be4be93d4dfff9e, under the MIT license.
 The original copyright notice and license are retained in LICENSE.
 The vendored plugin SDK is an API v1 snapshot from the accompanying T3 Code
 plugin-system implementation; it imports no T3 server internals.
+
+SDK source: https://github.com/djgilcrease/t3code/tree/990e429edb3a4de06204c2535f3086e58516e329/packages/plugin-sdk
